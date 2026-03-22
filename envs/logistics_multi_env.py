@@ -57,7 +57,7 @@ class LogisticsMultiEnv(ParallelEnv):
         if grid_size < 6:
             raise ValueError("grid_size should be at least 6 for valid layouts")
 
-        self.num_agents = num_agents
+        self._n_agents = num_agents
         self.grid_size = grid_size
         self.max_steps = max_steps
         self.num_traffic_cells = num_traffic_cells
@@ -131,10 +131,10 @@ class LogisticsMultiEnv(ParallelEnv):
         # Task endpoints: keep pickups and drops disjoint and spread out
         all_cells = [(x, y) for x in range(self.grid_size) for y in range(self.grid_size)]
         rng.shuffle(all_cells)
-        take = self.num_agents * 2
+        take = self._n_agents * 2
         chosen = all_cells[:take]
-        self._pickups = chosen[: self.num_agents]
-        self._drops = chosen[self.num_agents : self.num_agents * 2]
+        self._pickups = chosen[: self._n_agents]
+        self._drops = chosen[self._n_agents : self._n_agents * 2]
 
         used = set(self._pickups) | set(self._drops)
         free = [c for c in all_cells if c not in used]

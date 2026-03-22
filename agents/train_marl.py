@@ -8,11 +8,14 @@ from __future__ import annotations
 
 import argparse
 import csv
+import importlib.util
+import random
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+import torch
 import supersuit as ss
 from stable_baselines3 import PPO
 from stable_baselines3.ppo import MlpPolicy
@@ -22,6 +25,19 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from envs.logistics_multi_env import parallel_env  # noqa: E402
+
+
+def _set_global_seed(seed: int) -> None:
+    """SuperSuit ConcatVecEnv has no .seed(); set RNGs here instead of PPO(seed=...)."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+
+def _tensorboard_log_dir() -> Optional[str]:
+    if importlib.util.find_spec("tensorboard") is not None:
+        return str(ROOT / "results" / "tensorboard")
+    return None
 
 
 def build_vec_env(
@@ -100,6 +116,8 @@ def main() -> None:
     model_path = Path(args.model_path)
     model_path.parent.mkdir(parents=True, exist_ok=True)
 
+    _set_global_seed(args.seed)
+
     train_env = build_vec_env(
         num_agents=args.num_agents,
         seed=args.seed,
@@ -115,16 +133,15 @@ def main() -> None:
         batch_size=256,
         gamma=0.99,
         verbose=1,
-        seed=args.seed,
-        tensorboard_log=str(ROOT / "results" / "tensorboard"),
+        tensorboard_log=_tensorboard_log_dir(),
     )
 
     model.learn(total_timesteps=args.timesteps)
-    zip_path = model_path.with_suffix(".zip")
+    zip_path = model_path if str(model_path).endswith(".zip") else model_path.with_suffix(".zip")
     model.save(str(model_path))
     train_env.close()
 
-    trained = PPO.load(str(model_path))
+    trained = PPO.load(str(zip_path))
 
     rand_stats = evaluate_policy(
         args.num_agents, None, args.eval_episodes, seed=args.seed + 1, deterministic=True

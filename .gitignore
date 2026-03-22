@@ -6,4 +6,5 @@ __pycache__/
 .DS_Store
 results/models/*.zip
 results/frames/
+results/tensorboard/
 *.log
