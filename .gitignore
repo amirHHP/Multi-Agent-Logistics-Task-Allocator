@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.zip
+.DS_Store
+results/models/*.zip
+results/frames/
+*.log

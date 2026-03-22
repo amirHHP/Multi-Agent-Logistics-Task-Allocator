@@ -1,0 +1,16 @@
+# Multi-agent RL demo (PettingZoo + Stable-Baselines3)
+gymnasium>=0.29.0
+numpy>=1.24.0
+pettingzoo>=1.24.0
+stable-baselines3>=2.0.0
+supersuit>=3.9.0
+torch>=2.0.0
+
+# Viz & demos
+matplotlib>=3.7.0
+pandas>=2.0.0
+pillow>=10.0.0
+imageio>=2.31.0
+
+# Notebook (optional: pip install jupyter)
+jupyter>=1.0.0
